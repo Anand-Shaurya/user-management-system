@@ -23,3 +23,20 @@ async def get_user(username: str):
         user["_id"] = str(user["_id"])
         return user
     raise HTTPException(status_code=404, detail="User not found")
+
+@router.put("/user/", response_model=UserModel)
+async def update_user(user: UserModel):
+    result = await db["users"].update_one({"username": user.username}, {"$set": user.dict()})
+    if  result.modified_count == 1:
+        return user
+    else:
+        raise HTTPException(status_code=404, detail="UserName does not exist.")
+        
+    
+@router.delete("/user/{username}")
+async def delete_user(username: str):
+    result = await db["users"].delete_one({"username": username})
+    if result.deleted_count == 1:
+        return {"result": f"Successfully deleted {username}."}
+    raise HTTPException(status_code=404, detail="User not found")
+

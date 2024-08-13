@@ -3,12 +3,12 @@ from pymongo.server_api import ServerApi
 import urllib.parse
 from .. import settings
 
-MONGO_DB = {
-    "username": "career525mentor",
-    "password": "Mentor@1010",
-    "cluster_name": "mentrentcluster1",
-    "database_name": "ignitedminds"
-}
+MONGO_DB_USERNAME="career525mentor"
+MONGO_DB_PASSWORD="Mentor@1010"
+MONGO_DB_CLUSTER_NAME="mentrentcluster1"
+MONGO_DB_DATABASE_NAME="ignitedminds"
+
+
 
 # MongoDB connection details
 username = MONGO_DB["username"]
