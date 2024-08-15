@@ -4,17 +4,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Management System</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h1>Welcome to the User Management System</h1>
+    <h1>User Management System</h1>
     <div id="root"></div>
-    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/babel-standalone@6.26.0/babel.min.js"></script>
+
     <script type="text/babel">
-        function App() {
-            return <h2> This is a simple react component!</h2>;
+        class App extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = {
+                    users: [],
+                    username: '',
+                    email: '',
+                    full_name: ''
+                };
+            }
+
+            componentDidMount() {
+                this.fetchUsers();
+            }
+
+            fetchUsers = async () => {
+                const response = await fetch('/api/users/');
+                const users = await response.json();
+                this.setState({ users });
+            };
+
+            handleInputChange = (e) => {
+                const { name, value } = e.target;
+                this.setState({ [name]: value });
+            };
+
+            handleAddUser = async (e) => {
+                e.preventDefault();
+                const { username, email, full_name } = this.state;
+                const response = await fetch('/api/user/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, email, full_name })
+                });
+                if (response.ok) {
+                    this.fetchUsers();
+                }
+            };
+
+            handleDeleteUser = async (username) => {
+                const response = await fetch(`/api/user/${username}`, {
+                    method: 'DELETE',
+                });
+                if (response.ok) {
+                    this.fetchUsers();
+                }
+            };
+
+            render() {
+                return (
+                    <div>
+                        <h2>Users List</h2>
+                        <ul>
+                            {this.state.users.map(user => (
+                                <li key={user.username}>
+                                    {user.full_name} ({user.username}) - {user.email}
+                                    <button onClick={() => this.handleDeleteUser(user.username)}>Delete</button>
+                                </li>
+                            ))}
+                        </ul>
+
+                        <h2>Add a New User</h2>
+                        <form onSubmit={this.handleAddUser}>
+                            <input type="text" name="username" placeholder="Username" onChange={this.handleInputChange} required />
+                            <input type="email" name="email" placeholder="Email" onChange={this.handleInputChange} required />
+                            <input type="text" name="full_name" placeholder="Full Name" onChange={this.handleInputChange} />
+                            <button type="submit">Add User</button>
+                        </form>
+                    </div>
+                );
+            }
         }
+
         ReactDOM.render(<App />, document.getElementById('root'));
     </script>
 </body>

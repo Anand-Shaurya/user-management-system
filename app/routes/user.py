@@ -1,3 +1,4 @@
+from typing import List, Optional
 from fastapi import APIRouter, HTTPException
 from app.models.user import UserModel
 from app.config import db
@@ -16,6 +17,26 @@ async def create_user(user: UserModel):
         user_dict["_id"] = str(result.inserted_id)
         return user_dict
 
+
+@router.get("/users/",response_model=List[UserModel])
+async def get_user(username: Optional[str] = None):
+    if username:
+        user = await db["users"].find_one({"username": username})
+        if user:
+            user["_id"] = str(user["_id"])
+            return [user]
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    else:
+        user_cursor = db["users"].find()
+        users = []
+        async for user in user_cursor:
+            user["_id"] = str(user["_id"])
+            users.append(user)
+        return users
+
+
+
 @router.get("/user/{username}",response_model=UserModel)
 async def get_user(username: str):
     user = await db["users"].find_one({"username": username})
@@ -23,6 +44,7 @@ async def get_user(username: str):
         user["_id"] = str(user["_id"])
         return user
     raise HTTPException(status_code=404, detail="User not found")
+
 
 @router.put("/user/", response_model=UserModel)
 async def update_user(user: UserModel):
